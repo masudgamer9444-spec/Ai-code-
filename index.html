@@ -3,95 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MS_GEMINI_FINAL_FIX</title>
+    <title>MS HACKER STUDIO V12</title>
     <style>
-        :root { --bg: #050505; --gemini: #4285f4; --hacker: #39ff14; --border: #30363d; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: monospace; display: flex; height: 100vh; }
-        #sidebar { width: 250px; background: #0d1117; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 15px; }
-        #main { flex: 1; display: flex; flex-direction: column; }
-        header { height: 50px; background: #161b22; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid var(--border); justify-content: space-between; }
-        .tab-bar { display: flex; background: #000; gap: 10px; padding: 5px 20px; border-bottom: 1px solid var(--border); }
-        .tab { cursor: pointer; color: #555; font-size: 12px; }
-        .tab.active { color: var(--hacker); border-bottom: 1px solid var(--hacker); }
-        .viewer { flex: 1; position: relative; }
-        #codeOut { width: 100%; height: 100%; background: #010409; color: #7ee787; padding: 20px; border: none; font-size: 14px; outline: none; resize: none; display: block; }
-        #liveOut { width: 100%; height: 100%; background: #fff; border: none; display: none; }
-        .input-box { height: 120px; background: #161b22; display: flex; padding: 15px; gap: 10px; border-top: 1px solid var(--border); }
-        textarea { flex: 1; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 8px; padding: 10px; outline: none; }
-        .btn { background: var(--gemini); color: #fff; border: none; padding: 0 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        :root {
+            --hacker: #39ff14;
+            --cyber: #00f2ff;
+            --bg: #050505;
+            --panel: #0d1117;
+            --border: #30363d;
+        }
+
+        body {
+            margin: 0; background: var(--bg); color: #fff;
+            font-family: 'Consolas', monospace; display: flex; height: 100vh;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            width: 260px; background: var(--panel); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; transition: 0.3s;
+        }
+
+        .side-head { padding: 20px; font-weight: bold; border-bottom: 1px solid var(--border); color: var(--hacker); text-shadow: 0 0 10px var(--hacker); }
+
+        .file-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .file-box { padding: 10px; background: #161b22; margin-bottom: 5px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.2s; border-left: 3px solid transparent; }
+        .file-box:hover { border-left-color: var(--cyber); background: #1c212c; }
+
+        /* Main Workspace */
+        #main { flex: 1; display: flex; flex-direction: column; position: relative; }
+
+        header {
+            height: 50px; background: #000; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; padding: 0 20px; justify-content: space-between;
+        }
+
+        .tabs { display: flex; background: #080a0f; border-bottom: 1px solid var(--border); }
+        .tab-item { padding: 10px 20px; cursor: pointer; font-size: 12px; color: #555; }
+        .tab-item.active { color: var(--hacker); border-bottom: 2px solid var(--hacker); }
+
+        /* Viewer */
+        .content-view { flex: 1; position: relative; }
+        #codeEditor { width: 100%; height: 100%; background: #010409; color: #7ee787; border: none; padding: 20px; font-size: 14px; outline: none; resize: none; display: block; }
+        #liveFrame { width: 100%; height: 100%; background: #fff; border: none; display: none; }
+
+        /* Bottom Input */
+        .input-panel { height: 130px; background: #161b22; border-top: 1px solid var(--border); padding: 15px; display: flex; gap: 15px; }
+        textarea#prompt { flex: 1; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 8px; padding: 10px; outline: none; resize: none; }
+        .btn-build { width: 120px; background: var(--hacker); color: #000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; text-transform: uppercase; }
+
+        /* Key Settings */
+        .key-settings { padding: 15px; background: #000; border-top: 1px solid var(--border); }
+        input[type="password"] { width: 100%; background: #111; border: 1px solid #333; color: #fff; font-size: 10px; padding: 6px; border-radius: 4px; }
+
+        #loading-bar { display: none; height: 2px; background: var(--hacker); width: 0%; position: absolute; top: 0; transition: 0.3s; box-shadow: 0 0 10px var(--hacker); }
     </style>
 </head>
 <body>
+
     <div id="sidebar">
-        <b style="color:var(--gemini)">MS STUDIO V11</b>
-        <div style="margin-top:20px; font-size:10px; color:#555;">API KEY MANAGER</div>
-        <input type="password" id="gKey" placeholder="Paste Gemini Key" style="width:100%; background:#000; border:1px solid #333; color:#fff; padding:5px; margin-top:5px;">
-        <button onclick="saveKey()" style="width:100%; margin-top:5px; font-size:10px; cursor:pointer;">SAVE KEY</button>
-        <div id="fileList" style="margin-top:20px;"></div>
+        <div class="side-head">MS STUDIO V12</div>
+        <div class="file-list" id="files">
+            <div style="font-size: 10px; color: #444; margin-bottom: 10px;">[ CACHED_MODULES ]</div>
+        </div>
+        <div class="key-settings">
+            <div style="font-size: 9px; color: #888; margin-bottom: 5px;">GOOGLE_AI_KEY:</div>
+            <input type="password" id="apiKey" placeholder="Paste Gemini API Key">
+            <button onclick="saveKey()" style="width:100%; margin-top:5px; font-size:9px; cursor:pointer; background:var(--cyber); border:none; padding:4px;">LOCK PROTOCOL</button>
+        </div>
     </div>
+
     <div id="main">
+        <div id="loading-bar"></div>
         <header>
-            <div id="status" style="font-size:10px; color:var(--hacker)">[ STATUS: WAITING ]</div>
-            <div style="font-size:10px; color:#555">GOOGLE_AI_FIXED</div>
+            <div style="font-size: 10px; color: var(--hacker);">SYSTEM_CORE: ONLINE</div>
+            <div style="font-size: 10px; color: var(--cyber);">MODEL: GEMINI-1.5-FLASH</div>
         </header>
-        <div class="tab-bar">
-            <div class="tab active" id="t-code" onclick="switchV('code')">SOURCE_CODE</div>
-            <div class="tab" id="t-live" onclick="switchV('live')">LIVE_VIEW</div>
+
+        <div class="tabs">
+            <div class="tab-item active" id="tabCode" onclick="switchMode('code')">CODE_EDITOR</div>
+            <div class="tab-item" id="tabLive" onclick="switchMode('live')">LIVE_PREVIEW</div>
         </div>
-        <div class="viewer">
-            <textarea id="codeOut" readonly></textarea>
-            <iframe id="liveOut"></iframe>
+
+        <div class="content-view">
+            <textarea id="codeEditor" readonly placeholder="// Source code will appear here..."></textarea>
+            <iframe id="liveFrame"></iframe>
         </div>
-        <div class="input-box">
-            <textarea id="prompt" placeholder="Kaisa app chahiye? Type karein..."></textarea>
-            <button class="btn" onclick="build()">GENERATE</button>
+
+        <div class="input-panel">
+            <textarea id="prompt" placeholder="> Enter command (e.g., Build a metallic gold Free Fire tournament dashboard)"></textarea>
+            <button class="btn-build" onclick="startBuild()">EXECUTE</button>
         </div>
     </div>
 
     <script>
-        function saveKey() { localStorage.setItem('ms_g_v11', document.getElementById('gKey').value); alert("Key Saved!"); }
-        function switchV(m) {
-            document.getElementById('codeOut').style.display = m === 'code' ? 'block' : 'none';
-            document.getElementById('liveOut').style.display = m === 'live' ? 'block' : 'none';
-            document.getElementById('t-code').classList.toggle('active', m === 'code');
-            document.getElementById('t-live').classList.toggle('active', m === 'live');
+        let db = [];
+        
+        function saveKey() {
+            localStorage.setItem('ms_v12_key', document.getElementById('apiKey').value);
+            alert("API Key Locked in System Memory.");
         }
 
-        async function build() {
-            const p = document.getElementById('prompt').value;
-            const k = localStorage.getItem('ms_g_v11');
-            const st = document.getElementById('status');
-            if(!k) return alert("Pehle API Key dalo!");
+        function switchMode(m) {
+            document.getElementById('codeEditor').style.display = m === 'code' ? 'block' : 'none';
+            document.getElementById('liveFrame').style.display = m === 'live' ? 'block' : 'none';
+            document.getElementById('tabCode').classList.toggle('active', m === 'code');
+            document.getElementById('tabLive').classList.toggle('active', m === 'live');
+        }
 
-            st.innerText = "[ STATUS: PROCESSING... ]";
+        async function startBuild() {
+            const promptVal = document.getElementById('prompt').value;
+            const key = localStorage.getItem('ms_v12_key');
+            if(!key) return alert("Pehle API Key dalkar LOCK PROTOCOL dabaiye!");
+            if(!promptVal) return alert("Command empty!");
+
+            const loader = document.getElementById('loading-bar');
+            loader.style.display = 'block';
+            loader.style.width = '50%';
+
             try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${k}`, {
+                // Correct Endpoint for Gemini 1.5 Flash
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+                
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: p + " . Response format: Strictly ONLY the HTML/CSS/JS code, no markdown, no talk." }] }] })
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: promptVal + " . Output strictly ONLY high-quality HTML/CSS/JS code in one file. No talk." }]
+                        }]
+                    })
                 });
 
-                const data = await res.json();
+                const data = await response.json();
                 
-                // If Google returns error (like your screenshot)
-                if(data.error) {
-                    throw new Error(data.error.message);
-                }
+                if(data.error) throw new Error(data.error.message);
 
                 let code = data.candidates[0].content.parts[0].text.replace(/```html|```/gi, "").trim();
-                document.getElementById('codeOut').value = code;
+
+                loader.style.width = '100%';
+                
+                // Update UI
+                document.getElementById('codeEditor').value = code;
                 const blob = new Blob([code], { type: 'text/html' });
-                document.getElementById('liveOut').src = URL.createObjectURL(blob);
-                switchV('code');
+                document.getElementById('liveFrame').src = URL.createObjectURL(blob);
+                
+                // Add to Sidebar
+                const fName = `Module_${db.length + 1}.html`;
+                db.push({ name: fName, code: code });
+                updateSidebar();
+                
+                setTimeout(() => { switchMode('code'); loader.style.display = 'none'; loader.style.width = '0%'; }, 500);
+
             } catch (err) {
-                alert("API Error: " + err.message);
-                console.error(err);
-            } finally {
-                st.innerText = "[ STATUS: READY ]";
+                alert("Protocol Crash: " + err.message);
+                loader.style.display = 'none';
             }
         }
 
-        window.onload = () => { if(localStorage.getItem('ms_g_v11')) document.getElementById('gKey').value = localStorage.getItem('ms_g_v11'); };
+        function updateSidebar() {
+            const list = document.getElementById('files');
+            list.innerHTML = '<div style="font-size: 10px; color: #444; margin-bottom: 10px;">[ CACHED_MODULES ]</div>';
+            db.forEach(f => {
+                const div = document.createElement('div');
+                div.className = 'file-box';
+                div.innerHTML = `📄 ${f.name}`;
+                div.onclick = () => { document.getElementById('codeEditor').value = f.code; switchMode('code'); };
+                list.prepend(div);
+            });
+        }
+
+        window.onload = () => {
+            const k = localStorage.getItem('ms_v12_key');
+            if(k) document.getElementById('apiKey').value = k;
+        }
     </script>
 </body>
 </html>
