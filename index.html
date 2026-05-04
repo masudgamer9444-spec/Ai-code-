@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MS HACKER STUDIO v3</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
+
+        :root {
+            --hacker-green: #00ff41;
+            --cyber-blue: #00f2ff;
+            --danger-red: #ff3131;
+            --dark-deep: #050505;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background-color: var(--dark-deep);
+            color: var(--hacker-green);
+            font-family: 'Fira Code', monospace;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar - Hacker Vault */
+        #sidebar {
+            width: 280px;
+            background: rgba(10, 10, 10, 0.95);
+            border-right: 1px solid var(--hacker-green);
+            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 5px 0 15px rgba(0, 255, 65, 0.1);
+            z-index: 100;
+        }
+
+        #sidebar.closed { margin-left: -280px; }
+
+        .vault-header {
+            padding: 25px;
+            text-align: center;
+            border-bottom: 1px solid var(--hacker-green);
+            font-weight: bold;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px var(--hacker-green);
+        }
+
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .file-entry {
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            background: var(--glass);
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px;
+            transition: 0.3s;
+        }
+
+        .file-entry:hover {
+            background: rgba(0, 255, 65, 0.1);
+            border-color: var(--hacker-green);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+
+        /* Main Console */
+        #console {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #000;
+            border-bottom: 1px solid var(--cyber-blue);
+        }
+
+        .hacker-logo {
+            font-size: 18px;
+            color: var(--cyber-blue);
+            text-shadow: 0 0 10px var(--cyber-blue);
+        }
+
+        /* Input Area */
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            gap: 15px;
+        }
+
+        .input-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        textarea {
+            flex: 1;
+            background: #000;
+            border: 1px solid var(--hacker-green);
+            color: var(--hacker-green);
+            padding: 15px;
+            border-radius: 5px;
+            outline: none;
+            font-family: inherit;
+            box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.1);
+        }
+
+        .preview-pane {
+            flex: 1.5;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid var(--cyber-blue);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* Hacker Buttons */
+        .btn-exe {
+            background: transparent;
+            color: var(--hacker-green);
+            border: 1px solid var(--hacker-green);
+            padding: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.3s;
+        }
+
+        .btn-exe:hover {
+            background: var(--hacker-green);
+            color: #000;
+            box-shadow: 0 0 20px var(--hacker-green);
+        }
+
+        .key-mgr {
+            background: #111;
+            border: 1px solid #333;
+            color: #555;
+            padding: 5px 10px;
+            font-size: 10px;
+            border-radius: 3px;
+            width: 120px;
+        }
+
+        #status-bar {
+            position: absolute;
+            bottom: 25px;
+            left: 25px;
+            font-size: 12px;
+            display: none;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 768px) {
+            .workspace { flex-direction: column; }
+            .preview-pane { min-height: 300px; }
+            #sidebar { position: fixed; height: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <div class="vault-header">HACKER VAULT</div>
+        <div class="file-list" id="projectList">
+            </div>
+        <div style="padding: 20px; border-top: 1px solid #222;">
+            <input type="password" id="apiSecret" class="key-mgr" placeholder="Enter API Key">
+            <button onclick="lockKey()" style="font-size:10px; background:none; color:var(--cyber-blue); border:none; cursor:pointer;">[LOCK KEY]</button>
+        </div>
+    </div>
+
+    <div id="console">
+        <header>
+            <div style="display:flex; align-items:center; gap:20px;">
+                <span onclick="toggleVault()" style="cursor:pointer; font-size:24px;">[☰]</span>
+                <div class="hacker-logo">SYSTEM@MS_EXPERT_MASUD:~$</div>
+            </div>
+            <div id="clock" style="font-size:12px; color:var(--cyber-blue)"></div>
+        </header>
+
+        <div class="workspace">
+            <div class="input-container">
+                <textarea id="promptInput" placeholder="> Enter coding command... (e.g. Generate a dark VIP calculator)"></textarea>
+                <button class="btn-exe" onclick="executeCommand()">Execute Code Generation</button>
+            </div>
+            
+            <div class="preview-pane">
+                <iframe id="terminalPreview"></iframe>
+            </div>
+        </div>
+
+        <div id="status-bar">> RUNNING DECRYPTION PROTOCOL... <span id="percent">0%</span></div>
+    </div>
+
+    <script>
+        let fileIndex = 0;
+
+        function toggleVault() {
+            document.getElementById('sidebar').classList.toggle('closed');
+        }
+
+        function lockKey() {
+            const key = document.getElementById('apiSecret').value;
+            if(key) {
+                localStorage.setItem('ms_hacker_key', key);
+                alert("PROTOCOL LOCKED: API Key Secured.");
+            }
+        }
+
+        window.onload = () => {
+            const key = localStorage.getItem('ms_hacker_key');
+            if(key) document.getElementById('apiSecret').value = key;
+            
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('clock').innerText = now.toLocaleTimeString();
+            }, 1000);
+        }
+
+        async function executeCommand() {
+            const prompt = document.getElementById('promptInput').value;
+            const key = localStorage.getItem('ms_hacker_key');
+            const status = document.getElementById('status-bar');
+            
+            if(!key) return alert("ACCESS DENIED: Enter API Key in Vault.");
+            if(!prompt) return alert("ERROR: Command empty.");
+
+            status.style.display = "block";
+            let p = 0;
+            const loader = setInterval(() => {
+                p += Math.floor(Math.random() * 10);
+                if(p > 99) p = 99;
+                document.getElementById('percent').innerText = p + "%";
+            }, 100);
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'x-api-key': key,
+                        'anthropic-version': '2023-06-01',
+                        'content-type': 'application/json',
+                        'dangerously-allow-allowed-origins': 'true'
+                    },
+                    body: JSON.stringify({
+                        model: "claude-3-5-sonnet-20240620",
+                        max_tokens: 4000,
+                        system: "You are a senior hacker developer. Return ONLY complete HTML/CSS/JS code. No text, no talk.",
+                        messages: [{ role: "user", content: prompt }]
+                    })
+                });
+
+                const data = await response.json();
+                const code = data.content[0].text;
+
+                // Inject to Preview
+                const blob = new Blob([code], { type: 'text/html' });
+                document.getElementById('terminalPreview').src = URL.createObjectURL(blob);
+
+                // Add to Hacker Vault
+                fileIndex++;
+                const list = document.getElementById('projectList');
+                const div = document.createElement('div');
+                div.className = 'file-entry';
+                div.innerHTML = `> HASH_FILE_${fileIndex}.BIN`;
+                div.onclick = () => {
+                    const b = new Blob([code], { type: 'text/html' });
+                    document.getElementById('terminalPreview').src = URL.createObjectURL(b);
+                };
+                list.prepend(div);
+
+            } catch (err) {
+                alert("PROTOCOL CRASH: Invalid Key or Connection.");
+            } finally {
+                clearInterval(loader);
+                status.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
