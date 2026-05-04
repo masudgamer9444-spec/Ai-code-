@@ -3,172 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MS_AI_FIXED_V10</title>
+    <title>MS_GEMINI_FINAL_FIX</title>
     <style>
-        :root {
-            --bg: #050505;
-            --side: #0d1117;
-            --hacker: #39ff14;
-            --gemini: #4285f4;
-            --border: #30363d;
-        }
-
-        body {
-            margin: 0; background: var(--bg); color: #fff;
-            font-family: 'Consolas', monospace; display: flex; height: 100vh;
-        }
-
-        /* Explorer Sidebar */
-        #sidebar {
-            width: 250px; background: var(--side); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column;
-        }
-
-        .engine-box {
-            padding: 15px; border-bottom: 1px solid var(--border);
-            cursor: pointer; font-size: 11px; transition: 0.3s;
-        }
-        .engine-box.active { background: rgba(66, 133, 244, 0.15); border-left: 4px solid var(--gemini); }
-
-        .file-list { flex: 1; overflow-y: auto; padding: 10px; }
-        .file-tab { padding: 8px; margin-bottom: 5px; background: #1c212c; cursor: pointer; font-size: 12px; border-radius: 4px; }
-
-        /* Main Studio */
-        #main { flex: 1; display: flex; flex-direction: column; position: relative; }
-
-        header {
-            height: 50px; background: #161b22; border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; padding: 0 20px; justify-content: space-between;
-        }
-
-        .view-controls { display: flex; background: #000; padding: 5px; gap: 10px; border-bottom: 1px solid var(--border); }
-        .v-btn { cursor: pointer; padding: 5px 15px; font-size: 11px; color: #888; }
-        .v-btn.active { color: var(--hacker); border-bottom: 1px solid var(--hacker); }
-
-        .content-area { flex: 1; position: relative; overflow: hidden; }
-        #codeArea { width: 100%; height: 100%; background: #010409; color: #7ee787; padding: 20px; border: none; outline: none; font-size: 14px; resize: none; display: block; }
-        #liveArea { width: 100%; height: 100%; background: white; border: none; display: none; }
-
-        .input-bar { height: 100px; background: #161b22; display: flex; padding: 15px; gap: 10px; border-top: 1px solid var(--border); }
-        textarea#prompt { flex: 1; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 5px; padding: 10px; outline: none; resize: none; }
-        .btn-exe { background: var(--gemini); color: white; border: none; padding: 0 20px; font-weight: bold; border-radius: 5px; cursor: pointer; }
-
-        .key-mgr { padding: 10px; background: #000; border-top: 1px solid var(--border); }
-        .key-mgr input { width: 100%; background: #111; border: 1px solid #333; color: #fff; font-size: 9px; padding: 4px; }
+        :root { --bg: #050505; --gemini: #4285f4; --hacker: #39ff14; --border: #30363d; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: monospace; display: flex; height: 100vh; }
+        #sidebar { width: 250px; background: #0d1117; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 15px; }
+        #main { flex: 1; display: flex; flex-direction: column; }
+        header { height: 50px; background: #161b22; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid var(--border); justify-content: space-between; }
+        .tab-bar { display: flex; background: #000; gap: 10px; padding: 5px 20px; border-bottom: 1px solid var(--border); }
+        .tab { cursor: pointer; color: #555; font-size: 12px; }
+        .tab.active { color: var(--hacker); border-bottom: 1px solid var(--hacker); }
+        .viewer { flex: 1; position: relative; }
+        #codeOut { width: 100%; height: 100%; background: #010409; color: #7ee787; padding: 20px; border: none; font-size: 14px; outline: none; resize: none; display: block; }
+        #liveOut { width: 100%; height: 100%; background: #fff; border: none; display: none; }
+        .input-box { height: 120px; background: #161b22; display: flex; padding: 15px; gap: 10px; border-top: 1px solid var(--border); }
+        textarea { flex: 1; background: #000; border: 1px solid var(--border); color: #fff; border-radius: 8px; padding: 10px; outline: none; }
+        .btn { background: var(--gemini); color: #fff; border: none; padding: 0 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <div id="sidebar">
-        <div style="padding: 15px; color: var(--gemini); font-weight: bold;">MS_GEMINI_STUDIO</div>
-        <div class="engine-box active" onclick="alert('Google Gemini Engine Active')">
-            GOOGLE AI STUDIO<br><span style="color:#555">Model: Gemini 1.5 Pro</span>
-        </div>
-        <div class="file-list" id="files"></div>
-        <div class="key-mgr">
-            <input type="password" id="geminiKey" placeholder="Paste Google API Key Here">
-            <button onclick="saveKey()" style="width:100%; margin-top:5px; font-size:9px; cursor:pointer;">SAVE KEY</button>
-        </div>
+        <b style="color:var(--gemini)">MS STUDIO V11</b>
+        <div style="margin-top:20px; font-size:10px; color:#555;">API KEY MANAGER</div>
+        <input type="password" id="gKey" placeholder="Paste Gemini Key" style="width:100%; background:#000; border:1px solid #333; color:#fff; padding:5px; margin-top:5px;">
+        <button onclick="saveKey()" style="width:100%; margin-top:5px; font-size:10px; cursor:pointer;">SAVE KEY</button>
+        <div id="fileList" style="margin-top:20px;"></div>
     </div>
-
     <div id="main">
         <header>
-            <div id="status" style="font-size: 10px; color: var(--hacker);">[ SYSTEM READY ]</div>
-            <div style="font-size: 11px; color: #555;">v10.0.1_FIXED</div>
+            <div id="status" style="font-size:10px; color:var(--hacker)">[ STATUS: WAITING ]</div>
+            <div style="font-size:10px; color:#555">GOOGLE_AI_FIXED</div>
         </header>
-
-        <div class="view-controls">
-            <div class="v-btn active" id="b-code" onclick="setView('code')">SOURCE_CODE</div>
-            <div class="v-btn" id="b-live" onclick="setView('live')">LIVE_PREVIEW</div>
+        <div class="tab-bar">
+            <div class="tab active" id="t-code" onclick="switchV('code')">SOURCE_CODE</div>
+            <div class="tab" id="t-live" onclick="switchV('live')">LIVE_VIEW</div>
         </div>
-
-        <div class="content-area">
-            <textarea id="codeArea" readonly placeholder="// Coding output yahan dikhega..."></textarea>
-            <iframe id="liveArea"></iframe>
+        <div class="viewer">
+            <textarea id="codeOut" readonly></textarea>
+            <iframe id="liveOut"></iframe>
         </div>
-
-        <div class="input-bar">
-            <textarea id="prompt" placeholder="Kaisa website banana hai? Yahan likhein..."></textarea>
-            <button class="btn-exe" onclick="generate()">GENERATE</button>
+        <div class="input-box">
+            <textarea id="prompt" placeholder="Kaisa app chahiye? Type karein..."></textarea>
+            <button class="btn" onclick="build()">GENERATE</button>
         </div>
     </div>
 
     <script>
-        let db = [];
-        
-        function saveKey() {
-            localStorage.setItem('ms_gemini_key', document.getElementById('geminiKey').value);
-            alert("Google API Key Secured!");
+        function saveKey() { localStorage.setItem('ms_g_v11', document.getElementById('gKey').value); alert("Key Saved!"); }
+        function switchV(m) {
+            document.getElementById('codeOut').style.display = m === 'code' ? 'block' : 'none';
+            document.getElementById('liveOut').style.display = m === 'live' ? 'block' : 'none';
+            document.getElementById('t-code').classList.toggle('active', m === 'code');
+            document.getElementById('t-live').classList.toggle('active', m === 'live');
         }
 
-        function setView(m) {
-            document.getElementById('codeArea').style.display = m === 'code' ? 'block' : 'none';
-            document.getElementById('liveArea').style.display = m === 'live' ? 'block' : 'none';
-            document.getElementById('b-code').classList.toggle('active', m === 'code');
-            document.getElementById('b-live').classList.toggle('active', m === 'live');
-        }
-
-        async function generate() {
+        async function build() {
             const p = document.getElementById('prompt').value;
-            const k = localStorage.getItem('ms_gemini_key');
+            const k = localStorage.getItem('ms_g_v11');
+            const st = document.getElementById('status');
             if(!k) return alert("Pehle API Key dalo!");
 
-            document.getElementById('status').innerText = "[ INJECTING PROTOCOL... ]";
-            
+            st.innerText = "[ STATUS: PROCESSING... ]";
             try {
-                // Google AI Studio API Endpoint
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${k}`;
-                
-                const response = await fetch(url, {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${k}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{ text: p + " . Provide strictly ONLY the full code in a single HTML file including CSS and JS. Do not add markdown backticks like ```html. Start directly with <!DOCTYPE html>" }]
-                        }]
-                    })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: p + " . Response format: Strictly ONLY the HTML/CSS/JS code, no markdown, no talk." }] }] })
                 });
 
-                const data = await response.json();
+                const data = await res.json();
                 
-                // FIXED: Specific Gemini Response Parsing
-                let rawCode = data.candidates[0].content.parts[0].text;
-                
-                // Cleaning the code (removing markdown if present)
-                let cleanCode = rawCode.replace(/```html|```/gi, "").trim();
+                // If Google returns error (like your screenshot)
+                if(data.error) {
+                    throw new Error(data.error.message);
+                }
 
-                document.getElementById('codeArea').value = cleanCode;
-                const blob = new Blob([cleanCode], { type: 'text/html' });
-                document.getElementById('liveArea').src = URL.createObjectURL(blob);
-                
-                db.push({ name: `G_Module_${db.length+1}.html`, code: cleanCode });
-                updateFiles();
-                setView('code');
-
+                let code = data.candidates[0].content.parts[0].text.replace(/```html|```/gi, "").trim();
+                document.getElementById('codeOut').value = code;
+                const blob = new Blob([code], { type: 'text/html' });
+                document.getElementById('liveOut').src = URL.createObjectURL(blob);
+                switchV('code');
             } catch (err) {
-                alert("API Error: Key check karein ya billing enable hai ya nahi dekhein.");
+                alert("API Error: " + err.message);
                 console.error(err);
             } finally {
-                document.getElementById('status').innerText = "[ SYSTEM READY ]";
+                st.innerText = "[ STATUS: READY ]";
             }
         }
 
-        function updateFiles() {
-            const list = document.getElementById('files');
-            list.innerHTML = '';
-            db.forEach(f => {
-                const d = document.createElement('div');
-                d.className = 'file-tab';
-                d.innerText = `📄 ${f.name}`;
-                d.onclick = () => { document.getElementById('codeArea').value = f.code; setView('code'); };
-                list.prepend(d);
-            });
-        }
-
-        window.onload = () => {
-            const k = localStorage.getItem('ms_gemini_key');
-            if(k) document.getElementById('geminiKey').value = k;
-        };
+        window.onload = () => { if(localStorage.getItem('ms_g_v11')) document.getElementById('gKey').value = localStorage.getItem('ms_g_v11'); };
     </script>
 </body>
 </html>
